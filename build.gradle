@@ -1,0 +1,27 @@
+group = 'io.r2'
+version = '0.1-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'jacoco'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile (
+        'com.fasterxml.jackson.core:jackson-databind:2.7.4+'
+    )
+    testCompile (
+        'org.testng:testng:6.9.12',
+        'org.assertj:assertj-core:3.5.2',
+        'org.mockito:mockito-core:2.2.17'
+    )
+}
+
+test {
+    useTestNG()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8 
