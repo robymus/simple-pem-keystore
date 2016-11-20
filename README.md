@@ -61,11 +61,11 @@ The reloading keystore takes a configuration JSON as input, which may define mul
 
 ```JSON
     {
-      refreshInterval: 3600,
-      certificates: {
-        'letsencrypt': [
-          '/etc/letsencrypt/live/mydomain.com/fullchain.pem',
-          '/etc/letsencrypt/live/mydomain.com/privkey.pem'
+      "refreshInterval": 3600,
+      "certificates": {
+        "letsencrypt": [
+          "/etc/letsencrypt/live/mydomain.com/fullchain.pem",
+          "/etc/letsencrypt/live/mydomain.com/privkey.pem"
         ]
       }
     }
