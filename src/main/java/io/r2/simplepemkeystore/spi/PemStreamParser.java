@@ -86,6 +86,7 @@ public class PemStreamParser {
     /**
      * Shorthand notation for parsing input stream
      *
+     * @param in the input to parse
      * @param consumer receives all chunks with type and the chunk content as list of lines
      *                 the list of lines include the chunk header and footer as well
      * @throws IOException on input errors

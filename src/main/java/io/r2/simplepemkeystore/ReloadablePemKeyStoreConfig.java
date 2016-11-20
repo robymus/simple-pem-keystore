@@ -59,6 +59,7 @@ public class ReloadablePemKeyStoreConfig {
 
     /**
      * Fluid builder interface - adds a certificate with a given alias and list of pem files
+     *
      * @param alias alias to use
      * @param pemFiles the list of pem files to use
      * @return self, for chaining
@@ -69,7 +70,25 @@ public class ReloadablePemKeyStoreConfig {
     }
 
     /**
+     * Adds a Let's encrypt certificate
+     *
+     * It assumes certificates are located at
+     * /etc/letsencrypt/live/{domain}/{fullchain|privkey}.pem
+     * @param alias the alias in the keystore
+     * @param domain  the domain to create certificates for
+     * @return self, for chaining
+     */
+    public ReloadablePemKeyStoreConfig addLetsEncrypt(String alias, String domain) {
+        return addCertificate(alias, new String[] {
+                "/etc/letsencrypt/live/" + domain + "/fullchain.pem",
+                "/etc/letsencrypt/live/" + domain + "/privkey.pem"
+        });
+
+    }
+
+    /**
      * Fluid buidler interface - sets refresh interval
+     *
      * @param interval new refresh interval (in seconds)
      * @return self, for chaining
      */
@@ -80,6 +99,7 @@ public class ReloadablePemKeyStoreConfig {
 
     /**
      * Converts object to JSON string
+     *
      * @return object as JSON string
      */
     public String asJSON() {
@@ -94,9 +114,10 @@ public class ReloadablePemKeyStoreConfig {
 
     /**
      * Converts object to JSON string
+     *
      * @return object as JSON string
      */
-    public InputStream asInputStream() throws JsonProcessingException {
+    public InputStream asInputStream() {
         try {
             return new ByteArrayInputStream(mapper.writeValueAsBytes(this));
         }
@@ -109,17 +130,13 @@ public class ReloadablePemKeyStoreConfig {
 
     /**
      * Shorthand method to create a config for a Let's encrypt certificate
-     * It assumes certificates are located at
-     * /etc/letsencrypt/live/{domain}/{fullchain|privkey}.pem
-     * @param domain
-     * @return
+     *
+     * @param domain  the domain to create certificates for
+     * @return self, for chaining
+     * @see ReloadablePemKeyStoreConfig#addLetsEncrypt(String, String)
      */
     public static ReloadablePemKeyStoreConfig forLetsEncrypt(String domain) {
-        return new ReloadablePemKeyStoreConfig()
-                .addCertificate("letsencrypt", new String[] {
-                    "/etc/letsencrypt/live/" + domain + "/fullchain.pem",
-                    "/etc/letsencrypt/live/" + domain + "/privkey.pem"
-                });
+        return new ReloadablePemKeyStoreConfig().addLetsEncrypt("letsencrypt", domain);
     }
 
     @Override
