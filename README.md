@@ -6,13 +6,27 @@ The keystore also implements scheduled/automatic reloading of certificates in ca
  
 ## Compile
 
-```
+```Shell
 gradle jar
 ```
 
 ## Get
 
-Coming soon to a maven central repository near you.
+The latest release version (0.1) is available in the Maven Central repository.
+
+For maven:
+```Maven POM
+	<dependency>
+	    <groupId>io.r2</groupId>
+	    <artifactId>simple-pem-keystore</artifactId>
+	    <version>0.1</version>
+	</dependency>
+```
+
+For gradle:
+```Gradle
+	compile group: 'io.r2', name: 'simple-pem-keystore', version: '0.1'
+```
 
 ## Registering the security provider
 
@@ -131,5 +145,5 @@ Licensed under the MIT license.
 ## Requirements
 
 Java 8 is required to compile or run.
-Also depends on jackson-databind 
+Also depends on jackson-databind.
 
