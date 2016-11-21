@@ -15,6 +15,7 @@ gradle jar
 The latest release version (0.1) is available in the Maven Central repository.
 
 For maven:
+
 ```Maven POM
 	<dependency>
 	    <groupId>io.r2</groupId>
@@ -24,6 +25,7 @@ For maven:
 ```
 
 For gradle:
+
 ```Gradle
 	compile group: 'io.r2', name: 'simple-pem-keystore', version: '0.1'
 ```
