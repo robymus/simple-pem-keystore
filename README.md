@@ -16,7 +16,7 @@ The latest release version (0.1) is available in the Maven Central repository.
 
 For maven:
 
-```Maven POM
+```xml
 	<dependency>
 	    <groupId>io.r2</groupId>
 	    <artifactId>simple-pem-keystore</artifactId>
@@ -26,7 +26,7 @@ For maven:
 
 For gradle:
 
-```Gradle
+```gradle
 	compile group: 'io.r2', name: 'simple-pem-keystore', version: '0.1'
 ```
 
