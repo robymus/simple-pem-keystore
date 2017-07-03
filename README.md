@@ -1,4 +1,4 @@
-# pem-server-keystore
+# simple-pem-keystore
 
 A java keystore implementation to use PEM files directly, instead of converting them to PKCS#12 or the clumsy jks format. This makes interoperability with standard webservers easier as they can use the same key/certificate files.
 
