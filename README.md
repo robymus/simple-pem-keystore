@@ -52,7 +52,7 @@ The simple PEM keystore reads concatenated PEMs, which contains the key and the 
 
 ```java
     KeyStore ks = KeyStore.getInstance("simplepem");
-    ks.load( new FileInputStream("full.pem") );
+    ks.load( new FileInputStream("full.pem"), new char[0] );
 ```
 
 A convenience helper class is included, the MultiFileConcatSource concatenates multiple pem files into a single input source
@@ -129,7 +129,7 @@ To fully utilize the reloading capability, the new key manager has to be used. T
 
 ```java
     KeyStore ks = KeyStore.getInstance("simplepemreload");
-    ks.load( ReloadablePemKeyStoreConfig.forLetsEncrypt("mydomain.com").withRefreshInterval(60).asInputStream() );
+    ks.load( ReloadablePemKeyStoreConfig.forLetsEncrypt("mydomain.com").withRefreshInterval(60).asInputStream(), new char[0]);
 
     KeyManagerFactory kmf = KeyManagerFactory.getInstance("simplepemreload");
     kmf.init( ExpiringCacheKeyManagerParameters.forKeyStore(ks).withRevalidation(60) );
