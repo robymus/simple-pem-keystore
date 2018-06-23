@@ -55,7 +55,7 @@ The simple PEM keystore reads concatenated PEMs, which contains the key and the 
     ks.load( new FileInputStream("full.pem") );
 ```
 
-A convenience helper class is included, teh MultiFileConcatSource concatenates multiple pem files into a single input source
+A convenience helper class is included, the MultiFileConcatSource concatenates multiple pem files into a single input source
 
 ```java
     KeyStore ks = KeyStore.getInstance("simplepem");
