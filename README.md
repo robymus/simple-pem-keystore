@@ -136,7 +136,7 @@ To fully utilize the reloading capability, the new key manager has to be used. T
 
     KeyManager[] km = kmf.getKeyManagers();
     
-    SSLContext ctx = SSLContext.getInstance("TLSv1");
+    SSLContext ctx = SSLContext.getInstance("TLSv1.2");
     ctx.init(km, null /* use default trust manager */, null /* use default secure random */);       
 ```
 
