@@ -36,10 +36,10 @@ Before using the new key store, the security provider has to be registered in Ja
 
 ```java
     // directly
-    Security.addProvider(new io.r2.simplempemkeystore.SimplePemKeyStoreProvider());
+    Security.addProvider(new io.r2.simplepemkeystore.SimplePemKeyStoreProvider());
     
     // or using a shorthand syntax
-    io.r2.simplempemkeystore.SimplePemKeyStoreProvider.register();
+    io.r2.simplepemkeystore.SimplePemKeyStoreProvider.register();
 ```
 
 As the component is a fully compliant JCE provider, it may also be registered globally in the JRE. Please refer to JCE documentation on how to do this.
