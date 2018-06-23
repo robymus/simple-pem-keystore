@@ -75,7 +75,7 @@ public class KeyStoreProviderIntegrationTest extends HttpsBaseFunctions {
         KeyManager[] km = kmf.getKeyManagers();
         assertThat(km).hasSize(1);
 
-        SSLContext ctx = SSLContext.getInstance("TLSv1");
+        SSLContext ctx = SSLContext.getInstance("TLSv1.2");
         ctx.init(km, null, null);
     }
 
@@ -91,7 +91,7 @@ public class KeyStoreProviderIntegrationTest extends HttpsBaseFunctions {
         KeyManager[] km = kmf.getKeyManagers();
         assertThat(km).hasSize(1);
 
-        SSLContext ctx = SSLContext.getInstance("TLSv1");
+        SSLContext ctx = SSLContext.getInstance("TLSv1.2");
         ctx.init(km, null, null);
 
         HttpsServer server = startHttpsServer(ctx);

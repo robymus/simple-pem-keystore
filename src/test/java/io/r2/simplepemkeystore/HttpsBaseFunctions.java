@@ -8,9 +8,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.URL;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -24,22 +22,35 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class HttpsBaseFunctions {
 
+    public static final int PORT_MIN = 59000;
+    public static final int PORT_MAX = 60000;
+    public int port;
+
     protected HttpsServer startHttpsServer(SSLContext ctx) throws Exception {
-        InetSocketAddress localhost = new InetSocketAddress("127.0.0.59", 59995);
-        HttpsServer server = HttpsServer.create(localhost,  0);
-        server.setHttpsConfigurator(new HttpsConfigurator(ctx));
+        for (int i = PORT_MIN; i < PORT_MAX; i++) {
+            port = i;
+            try {
+                InetSocketAddress localhost = new InetSocketAddress(InetAddress.getLoopbackAddress(), port);
+                HttpsServer server = HttpsServer.create(localhost,  0);
+                server.setHttpsConfigurator(new HttpsConfigurator(ctx));
 
-        server.createContext("/", (t) -> {
-            byte[] data = "success".getBytes();
-            t.sendResponseHeaders(HttpURLConnection.HTTP_OK, data.length);
-            OutputStream o = t.getResponseBody();
-            o.write(data);
-            o.close();
-        });
-        server.setExecutor(null);
-        server.start();
+                server.createContext("/", (t) -> {
+                    byte[] data = "success".getBytes();
+                    t.sendResponseHeaders(HttpURLConnection.HTTP_OK, data.length);
+                    OutputStream o = t.getResponseBody();
+                    o.write(data);
+                    o.close();
+                });
+                server.setExecutor(null);
+                server.start();
 
-        return server;
+                return server;
+            }
+            catch (BindException be) {
+                // ignore, try next port
+            }
+        }
+        throw new Exception("Can't find available ports for integration testing");
     }
 
     protected HttpsURLConnection createClientConnection() throws Exception {
@@ -63,7 +74,8 @@ public class HttpsBaseFunctions {
 
         // try to connect to server
 
-        URL url = new URL("https://127.0.0.59:59995/");
+        String _url = "https://"+InetAddress.getLoopbackAddress().getHostAddress()+":"+port;
+        URL url = new URL(_url);
         HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
         conn.setSSLSocketFactory(clientContext.getSocketFactory());
         conn.setHostnameVerifier((hostname, session) -> true);
