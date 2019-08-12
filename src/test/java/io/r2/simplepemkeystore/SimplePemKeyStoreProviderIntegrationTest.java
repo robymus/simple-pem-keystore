@@ -31,16 +31,16 @@ import java.util.Arrays;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Tests if registering as a provider works and keystore is operational
+ * Tests if registering as a provider works and simplepem keystore is operational
  */
-public class KeyStoreProviderIntegrationTest extends HttpsBaseFunctions {
+public class SimplePemKeyStoreProviderIntegrationTest extends HttpsBaseFunctions {
 
     @BeforeClass
     public void registerProvider() throws Exception {
         Security.addProvider(new SimplePemKeyStoreProvider());
     }
 
-    protected KeyStore getKeyStore() throws Exception {
+    private KeyStore getKeyStore() throws Exception {
         KeyStore ks = KeyStore.getInstance("simplepem");
         ks.load(
                 MultiFileConcatSource.fromFiles(

@@ -1,6 +1,7 @@
 package io.r2.simplepemkeystore;
 
 import com.sun.net.httpserver.HttpsServer;
+import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -28,8 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ReloadablePemKeyStoreIntegrationTest extends HttpsBaseFunctions {
 
 
-    Path certPath;
-    Path keyPath;
+    private Path certPath;
+    private Path keyPath;
 
 
     @BeforeClass
@@ -46,7 +47,7 @@ public class ReloadablePemKeyStoreIntegrationTest extends HttpsBaseFunctions {
         Files.delete(keyPath);
     }
 
-    protected void copyCertKey(String cert, String key) throws Exception {
+    private void copyCertKey(String cert, String key) throws Exception {
         String prefix = "src/test/resources/";
         Files.copy(new File(prefix+cert).toPath(), certPath, StandardCopyOption.REPLACE_EXISTING);
         Files.copy(new File(prefix+key).toPath(), keyPath, StandardCopyOption.REPLACE_EXISTING);
@@ -54,7 +55,7 @@ public class ReloadablePemKeyStoreIntegrationTest extends HttpsBaseFunctions {
         keyPath.toFile().setLastModified(System.currentTimeMillis());
     }
 
-    protected KeyStore getKeyStore() throws Exception {
+    private KeyStore getKeyStore() throws Exception {
         KeyStore ks = KeyStore.getInstance("simplepemreload");
 
         ks.load(
@@ -73,6 +74,9 @@ public class ReloadablePemKeyStoreIntegrationTest extends HttpsBaseFunctions {
 
     @Test
     public void testHttps() throws Exception {
+        // skip long tests if io.r2.skipLongTests is set to true
+        if ("true".equals(System.getProperty("io.r2.skipLongTests"))) throw new SkipException("Long test skipped");
+
         copyCertKey("certchain.pem", "key.pem");
 
         KeyStore ks = getKeyStore();
