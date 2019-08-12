@@ -1,7 +1,10 @@
 package io.r2.simplepemkeystore;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * MultiFileConcatSource - builds an InputStream from the pre-buffered contents of multiple files
@@ -9,7 +12,7 @@ import java.nio.file.Path;
  */
 public class MultiFileConcatSource  {
 
-    protected ByteArrayOutputStream contents;
+    private ByteArrayOutputStream contents;
 
     /**
      * Create an empty builder
@@ -67,6 +70,50 @@ public class MultiFileConcatSource  {
         try (InputStream is = new FileInputStream(fileName)) {
             return add(is);
         }
+    }
+
+    /**
+     * Append bytes to the input source
+     * @param bytes the raw bytes to add
+     * @return the object itself for chaining
+     * @throws IOException in case of error
+     */
+    public MultiFileConcatSource addBytes(byte[] bytes) throws IOException {
+        contents.write(bytes);
+        return this;
+    }
+
+
+    /**
+     * Add alias to the input source as metadata
+     * @param alias the alias to add
+     * @return the object itself for chaining
+     * @throws IOException in case of error
+     */
+    public MultiFileConcatSource alias(String alias) throws IOException {
+        contents.write(("alias:"+alias+"\n").getBytes(StandardCharsets.UTF_8));
+        return this;
+    }
+
+    /**
+     * Add creationDate to the input source as metadata
+     * @param date the date to add
+     * @return the object itself for chaining
+     * @throws IOException in case of error
+     */
+    public MultiFileConcatSource creationDate(Date date) throws IOException {
+        return creationDate(date.toInstant());
+    }
+
+    /**
+     * Add creationDate to the input source as metadata
+     * @param instant the date to add
+     * @return the object itself for chaining
+     * @throws IOException in case of error
+     */
+    public MultiFileConcatSource creationDate(Instant instant) throws IOException {
+        contents.write(("creationdate:"+instant.toString()+"\n").getBytes(StandardCharsets.UTF_8));
+        return this;
     }
 
     /**

@@ -4,15 +4,15 @@ import java.security.Provider;
 import java.security.Security;
 
 /**
- * Master class for JCE integration, defining implementated functions
+ * Master class for JCE integration, defining implemented functions
  */
 public final class SimplePemKeyStoreProvider extends Provider {
 
     public SimplePemKeyStoreProvider() {
         super(
                 "SimplePemKeyStore",
-                0.1,
-                "SimplePemKeyStore 0.1 - PEM based key stores with automatic reloading"
+                0.2,
+                "SimplePemKeyStore 0.2 - PEM based key stores with automatic reloading"
         );
         put("KeyStore.simplepem", "io.r2.simplepemkeystore.spi.SimplePemKeyStoreSpi");
         put("KeyStore.simplepemreload", "io.r2.simplepemkeystore.spi.ReloadablePemKeyStoreSpi");

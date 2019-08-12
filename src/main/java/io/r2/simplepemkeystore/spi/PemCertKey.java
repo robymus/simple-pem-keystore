@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 class PemCertKey {
 
     public static String META_KEY_ALIAS = "alias";
-    public static String META_KEY_CREATIONDATE = "creationdata";
+    public static String META_KEY_CREATIONDATE = "creationdate";
 
     protected String alias;
     protected Date creationDate;
