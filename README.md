@@ -12,7 +12,7 @@ gradle jar
 
 ## Get
 
-The latest release version (0.1) is available in the Maven Central repository.
+The latest release version (0.2) is available in the Maven Central repository.
 
 For maven:
 
@@ -20,14 +20,14 @@ For maven:
 	<dependency>
 	    <groupId>io.r2</groupId>
 	    <artifactId>simple-pem-keystore</artifactId>
-	    <version>0.1</version>
+	    <version>0.2</version>
 	</dependency>
 ```
 
 For gradle:
 
 ```gradle
-	compile group: 'io.r2', name: 'simple-pem-keystore', version: '0.1'
+	compile group: 'io.r2', name: 'simple-pem-keystore', version: '0.2'
 ```
 
 ## Registering the security provider
@@ -70,6 +70,39 @@ A convenience helper class is included, the MultiFileConcatSource concatenates m
 ```
 
 Please note that this key store does not support password, the password parameter is required for API compatibility but not used.
+
+The certificate is loaded with alias 'server'.
+
+## Multiple certificates with simplepem
+
+*new in 0.2*
+
+The simplepem provider now supports loading multiple certificates from a single concatenated source. To use this feature, add a metadata block between the certificates:
+
+```
+alias: client
+creationdate: ISO-8601 time
+```
+
+The creationdate is optional, it defaults to the current time at the time of loading, if not present. Metadata should be outside the ----BEGIN/END blocks.
+
+The MultiFileConcatSource helper also supports adding these metadata fields, for convenience, for example
+
+```java
+    KeyStore ks = KeyStore.getInstance("simplepem");
+    ks.load(
+            new MultiFileConcatSource()
+                .alias("server")
+                    .add("cert.pem")
+                    .add("key.pem")
+                .alias("client")
+                .creationDate(Instant.now())
+                    .add("client-cert.pem")
+                    .add("client-key.pem")
+                .build(),
+            new char[0] // no password
+    );
+```
 
 ## Usage - reloading keystore
 
@@ -124,6 +157,12 @@ To fully utilize the reloading capability, the new key manager has to be used. T
     KeyManagerFactory kmf = KeyManagerFactory.getInstance("simplepemreload");
     kmf.init( ExpiringCacheKeyManagerParameters.forKeyStore(ks).withRevalidation(60) );
 ```
+
+*new in 0.2*
+
+Now the "simplepem" provider also supports certificate reloading, when used with the "simplepemreload" key manager factory. To use this, simple load a new certificate (or set of certificates) with `ks.load`.
+
+Note: when loading new certificates, the existing ones with same alias are overwritten, but it does not delete the ones with no reference in the new input. This is to be consistent with JCE, which expects certificates to not disappear after being used (KeyManager caches certificates).
 
 ## Usage - SSLContext setup example
 
