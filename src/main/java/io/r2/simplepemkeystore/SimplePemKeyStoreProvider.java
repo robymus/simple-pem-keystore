@@ -11,8 +11,8 @@ public final class SimplePemKeyStoreProvider extends Provider {
     public SimplePemKeyStoreProvider() {
         super(
                 "SimplePemKeyStore",
-                0.2,
-                "SimplePemKeyStore 0.2 - PEM based key stores with automatic reloading"
+                0.3,
+                "SimplePemKeyStore 0.3 - PEM based key stores with automatic reloading"
         );
         put("KeyStore.simplepem", "io.r2.simplepemkeystore.spi.SimplePemKeyStoreSpi");
         put("KeyStore.simplepemreload", "io.r2.simplepemkeystore.spi.ReloadablePemKeyStoreSpi");
