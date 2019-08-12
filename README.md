@@ -179,6 +179,10 @@ Note: when loading new certificates, the existing ones with same alias are overw
     ctx.init(km, null /* use default trust manager */, null /* use default secure random */);       
 ```
 
+## Javadoc
+
+The javadoc for the public helper classes is available at https://r2.io/javadoc/simple-pem-keystore/
+
 ## License
 
 Licensed under the MIT license. 

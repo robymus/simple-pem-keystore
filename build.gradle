@@ -21,6 +21,10 @@ test {
     useTestNG()
 }
 
+javadoc {
+    exclude "io/r2/simplepemkeystore/spi/**"
+}
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 

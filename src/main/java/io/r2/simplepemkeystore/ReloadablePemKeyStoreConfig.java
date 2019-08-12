@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Configuration for the reloadable
+ * Configuration for the simplepemreload key store - helper class to build input JSON format.
  */
 public class ReloadablePemKeyStoreConfig {
 

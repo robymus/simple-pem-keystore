@@ -8,7 +8,7 @@ import java.util.Date;
 
 /**
  * MultiFileConcatSource - builds an InputStream from the pre-buffered contents of multiple files
- * This builder class is mutable, it builds into an internal buffer
+ * This builder class is mutable, it builds into an internal buffer.
  */
 public class MultiFileConcatSource  {
 

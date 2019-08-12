@@ -1,6 +1,6 @@
 group = "io.r2"
 archivesBaseName = "simple-pem-keystore"
-version = "0.2-SNAPSHOT"
+version = "0.2"
 
 apply plugin: 'maven'
 apply plugin: 'signing'

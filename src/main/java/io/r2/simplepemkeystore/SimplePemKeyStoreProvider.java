@@ -4,7 +4,7 @@ import java.security.Provider;
 import java.security.Security;
 
 /**
- * Master class for JCE integration, defining implemented functions
+ * Entry point for JCE integration, defining implemented functions.
  */
 public final class SimplePemKeyStoreProvider extends Provider {
 

@@ -4,7 +4,7 @@ import javax.net.ssl.ManagerFactoryParameters;
 import java.security.KeyStore;
 
 /**
- * Special parameters for the ExpiringCacheKeyManagerFactory
+ * Parameters builder for the ExpiringCacheKeyManagerFactory.
  */
 public class ExpiringCacheKeyManagerParameters implements ManagerFactoryParameters {
 
