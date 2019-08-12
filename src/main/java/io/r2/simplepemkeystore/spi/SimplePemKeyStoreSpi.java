@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A simple (non-reloadable) PEM based key store
@@ -11,7 +14,9 @@ import java.security.cert.CertificateException;
 public class SimplePemKeyStoreSpi extends BasePemKeyStore {
 
     /**
-     * Loads from a stream of PEM files and stores under alias 'server'
+     * Loads from a stream of PEM files
+     * If no alias metadata present, it stores under alias 'server'
+     * Otherwise can parse multiple certificates separated by alias metadata
      *
      * @param stream input stream with multiple PEMs (including certificate chain and key)
      * @param password not used, password protection is not supported
@@ -21,6 +26,16 @@ public class SimplePemKeyStoreSpi extends BasePemKeyStore {
      */
     @Override
     public void engineLoad(InputStream stream, char[] password) throws IOException, NoSuchAlgorithmException, CertificateException {
-        store.put("server", new PemCertKey(stream));
+        List<PemCertKey> certList = PemStreamParser.parseCertificateList(stream);
+        // check for alias conflict in input
+        Map<String, PemCertKey> newCerts = new HashMap<>();
+        for (PemCertKey certkey : certList) {
+            String alias = certkey.getAlias();
+            if (newCerts.putIfAbsent(alias, certkey) != null) {
+                throw new CertificateException("Multiple entries with the same alias: " + alias);
+            }
+        }
+        // no alias conflict: store everything (update existing also)
+        store.putAll(newCerts);
     }
 }

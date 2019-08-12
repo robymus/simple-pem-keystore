@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class ReloadablePemKeyStoreSpi extends BasePemKeyStore {
 
     /** current configuration */
-    protected ReloadablePemKeyStoreConfig configuration;
+    private ReloadablePemKeyStoreConfig configuration;
 
     /** scheduler for the certificate refreshing task */
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -61,10 +61,10 @@ public class ReloadablePemKeyStoreSpi extends BasePemKeyStore {
         // load all certificates
         for (String alias : configuration.getCertificates().keySet()) {
             refreshCertificate(alias);
-        };
+        }
 
         // schedule modification check and reload
-        scheduler.scheduleAtFixedRate(()->{
+        scheduler.scheduleAtFixedRate(() -> {
             for (String alias : configuration.getCertificates().keySet()) {
                 try {
                     refreshCertificate(alias);
@@ -82,7 +82,7 @@ public class ReloadablePemKeyStoreSpi extends BasePemKeyStore {
      * @throws CertificateException on certificate format error
      * @throws NoSuchAlgorithmException when required cryptographic algorithms are missing
      */
-    protected void refreshCertificate(String alias) throws IOException, CertificateException, NoSuchAlgorithmException  {
+    private void refreshCertificate(String alias) throws IOException, CertificateException, NoSuchAlgorithmException  {
 
         String[] files = configuration.getCertificates().get(alias);
 
@@ -100,8 +100,9 @@ public class ReloadablePemKeyStoreSpi extends BasePemKeyStore {
         {
 
             store.put(alias,
-                    new PemCertKey(
+                    PemStreamParser.parseCertificate(
                             MultiFileConcatSource.fromFiles(files).build(),
+                            alias,
                             fileDate
                     )
             );

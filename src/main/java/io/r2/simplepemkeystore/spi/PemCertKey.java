@@ -1,7 +1,6 @@
 package io.r2.simplepemkeystore.spi;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -13,10 +12,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -25,66 +23,70 @@ import java.util.stream.Collectors;
  */
 class PemCertKey {
 
+    public static String META_KEY_ALIAS = "alias";
+    public static String META_KEY_CREATIONDATE = "creationdata";
+
+    protected String alias;
     protected Date creationDate;
+    protected Map<String, String> metaData;
     protected Key privateKey;
     protected List<Certificate> certificateChain;
     protected Certificate[] certificateChainPacked;
 
     /**
-     * Reads a new certificate chain and key from an input stream
-     * Parses input to get key and certificates.
-     * CreationDate is set to today
-     *
-     * @param input the input stream
-     * @throws IOException in case if input error
-     * @throws CertificateException if loading is failed
-     * @throws NoSuchAlgorithmException if algorithms not available (now only RSA is used)
+     * Create an empty object, for adding fields later
      */
-    public PemCertKey(InputStream input) throws IOException, CertificateException, NoSuchAlgorithmException {
-        this(input, new Date());
-    }
-
-    /**
-     * Reads a new certificate chain and key from an input stream
-     * Parses input to get key and certificates.
-     * Creation Data is set to the specified time (millis from epoch)
-     *
-     * @param input the input stream
-     * @param creationDate the creation date of this entry (for file based certificates, the file modification time)
-     * @throws IOException in case if input error
-     * @throws CertificateException if loading is failed
-     * @throws NoSuchAlgorithmException if algorithms not available (now only RSA is used)
-     */
-    public PemCertKey(InputStream input, Date creationDate) throws IOException, CertificateException, NoSuchAlgorithmException {
-        this.creationDate = creationDate;
+    public PemCertKey() {
+        alias = "server"; // default alias
+        creationDate = new Date();
         privateKey = null;
         certificateChain = new ArrayList<>();
-
-        PemStreamParser.parse(input, (type, chunk) -> {
-            switch (type) {
-                case certificate:
-                    addCertificate(chunk);
-                    break;
-                case key:
-                    setPrivateKey(chunk);
-                    break;
-            }
-        });
-
-        // put to packed structure
-        certificateChainPacked = certificateChain.toArray(new Certificate[certificateChain.size()]);
+        metaData = new HashMap<>();
     }
 
     /**
-     * Internal method used during parsing : sets the private key in this entry
+     * Finish construction of this object
+     * @return object for chaining
+     */
+    public PemCertKey build() {
+        // put to packed structure
+        certificateChainPacked = certificateChain.toArray(new Certificate[0]);
+        return this;
+    }
+
+    /**
+     * Sets metadata and parses alias/creationDate, if available
+     *
+     * @param metaData input unparsed metadata
+     * @throws CertificateException if creationDate exists but invalid format
+     */
+    public void setMetaData(Map<String, String> metaData) throws CertificateException {
+        this.metaData = metaData;
+        if (metaData.containsKey(META_KEY_ALIAS)) {
+            alias = metaData.get(META_KEY_ALIAS);
+        }
+        if (metaData.containsKey(META_KEY_CREATIONDATE)) {
+            Instant t;
+            try {
+                t = Instant.parse(metaData.get(META_KEY_CREATIONDATE));
+            }
+            catch (DateTimeParseException e) {
+                throw new CertificateException(e);
+            }
+            creationDate = Date.from(t);
+        }
+    }
+
+    /**
+     * Method used during parsing : sets the private key in this entry
      *
      * @param key the chunk containing certificate
      * @throws CertificateException if key already exists
      */
-    private void setPrivateKey(List<String> key) throws CertificateException, NoSuchAlgorithmException {
+    public void setPrivateKey(List<String> key) throws CertificateException, NoSuchAlgorithmException {
         if (privateKey != null) throw new CertificateException("More than one private key in PEM input");
 
-        String b64key = key.subList(1, key.size()-1).stream().collect(Collectors.joining());
+        String b64key = String.join("", key.subList(1, key.size() - 1));
         byte[] binKey = Base64.getDecoder().decode(b64key);
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(binKey);
 
@@ -101,12 +103,29 @@ class PemCertKey {
      * Add a new certificate to the chain
      * @param chunk the chunk containing certificate
      */
-    private void addCertificate(List<String> chunk) throws CertificateException {
+    public void addCertificate(List<String> chunk) throws CertificateException {
         InputStream is = new ByteArrayInputStream(
-                chunk.stream().collect(Collectors.joining("\n")).getBytes(StandardCharsets.UTF_8)
+                String.join("\n", chunk).getBytes(StandardCharsets.UTF_8)
         );
         CertificateFactory cf = CertificateFactory.getInstance("X.509");
         certificateChain.add(cf.generateCertificate(is));
+    }
+
+    /**
+     * Gets the alias of this certificate
+     * @return alias of certificate
+     */
+    public String getAlias() {
+        return alias;
+    }
+
+    /**
+     * Change alias of certificate
+     * @param alias new alias
+     */
+    public void setAlias(String alias) {
+        this.alias = alias;
+        metaData.put(META_KEY_ALIAS, alias);
     }
 
     /**
@@ -115,6 +134,23 @@ class PemCertKey {
      */
     public Date getCreationDate() {
         return creationDate;
+    }
+
+    /**
+     * Change creation date of certificate
+     * @param creationDate new alias
+     */
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+        metaData.put(META_KEY_CREATIONDATE, creationDate.toInstant().toString());
+    }
+
+    /**
+     * Returns the optional metadata fields in this certificate (including alias and creationDate)
+     * @return map of metadata keys and values
+     */
+    public Map<String, String> getMetaData() {
+        return metaData;
     }
 
     /**

@@ -14,6 +14,8 @@ import static org.assertj.core.api.Assertions.*;
  */
 public class PemStreamParserTest {
 
+    // TODO: metadata
+
     @Test
     public void testParseOk() throws Exception {
         FileInputStream in = new FileInputStream("src/test/resources/parser-ok.pem");
@@ -21,12 +23,13 @@ public class PemStreamParserTest {
         ArrayList<String> parsed = new ArrayList<>();
         PemStreamParser.parse(in, (type, chunk) -> {
             chunks.add(type);
-            parsed.add(chunk.stream().collect(Collectors.joining("\n")));
+            parsed.add(String.join("\n", chunk));
         });
         assertThat(chunks).containsExactly(
                 PemStreamParser.ChunkType.certificate,
                 PemStreamParser.ChunkType.certificate,
-                PemStreamParser.ChunkType.key
+                PemStreamParser.ChunkType.key,
+                PemStreamParser.ChunkType.end
         );
         assertThat(parsed).containsExactly(
                 "-----BEGIN CERTIFICATE-----\n" +
@@ -42,7 +45,9 @@ public class PemStreamParserTest {
                 "-----BEGIN PRIVATE KEY-----\n" +
                 "key1\n" +
                 "datak1\n" +
-                "-----END PRIVATE KEY-----"
+                "-----END PRIVATE KEY-----",
+
+                ""
         );
     }
 

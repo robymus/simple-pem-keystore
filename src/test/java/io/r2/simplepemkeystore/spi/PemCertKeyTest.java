@@ -19,7 +19,7 @@ public class PemCertKeyTest {
     @Test
     public void testCertOnly() throws Exception {
         InputStream in = new FileInputStream("src/test/resources/cert.pem");
-        PemCertKey t = new PemCertKey(in);
+        PemCertKey t = PemStreamParser.parseCertificate(in);
 
         Certificate cert = t.getCertificate();
         assertThat(cert).isNotNull();
@@ -41,7 +41,7 @@ public class PemCertKeyTest {
     @Test
     public void testKeyOnly() throws Exception {
         InputStream in = new FileInputStream("src/test/resources/key.pem");
-        PemCertKey t = new PemCertKey(in);
+        PemCertKey t = PemStreamParser.parseCertificate(in);
 
         assertThat(t.hasCertificate()).isFalse();
         assertThat(t.getCertificateChain()).hasSize(0);
@@ -63,7 +63,7 @@ public class PemCertKeyTest {
                 "src/test/resources/certchain.pem",
                 "src/test/resources/key.pem"
         ).build();
-        PemCertKey t = new PemCertKey(in);
+        PemCertKey t = PemStreamParser.parseCertificate(in);
 
         Certificate cert = t.getCertificate();
         assertThat(cert).isNotNull();
@@ -83,6 +83,10 @@ public class PemCertKeyTest {
 
         assertThat(t.getCreationDate()).isCloseTo(new Date(), 5000);
     }
+
+    // TODO: metadata test
+
+    // TODO: multiple cert test
 
 
 }
