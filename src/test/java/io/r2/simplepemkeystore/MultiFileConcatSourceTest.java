@@ -4,12 +4,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.*;
@@ -62,7 +61,6 @@ public class MultiFileConcatSourceTest {
         assertThat(res).containsExactly(result);
     }
 
-
     @Test
     public void testAdd_is() throws Exception {
         MultiFileConcatSource s = new MultiFileConcatSource();
@@ -96,6 +94,16 @@ public class MultiFileConcatSourceTest {
         s.add(testPath[2].toFile().getCanonicalPath());
         validate(s);
     }
+
+    @Test
+    public void testAddBytes() throws Exception {
+        MultiFileConcatSource s = new MultiFileConcatSource()
+                .addBytes(testStr[0].getBytes(StandardCharsets.UTF_8))
+                .addBytes(testStr[1].getBytes(StandardCharsets.UTF_8))
+                .addBytes(testStr[2].getBytes(StandardCharsets.UTF_8));
+        validate(s);
+    }
+
 
     @Test
     public void testSize() throws Exception {
@@ -134,6 +142,30 @@ public class MultiFileConcatSourceTest {
                         testPath[2].toFile().getCanonicalPath()
                 )
         );
+    }
+
+    @Test
+    public void testAlias() throws Exception {
+        MultiFileConcatSource s = new MultiFileConcatSource();
+        s.alias("myAlias")
+         .add(is(0));
+
+        BufferedReader r = new BufferedReader(new InputStreamReader(s.build()));
+        assertThat(r.readLine()).isEqualTo("alias:myAlias");
+        assertThat(r.readLine()).isEqualTo(testStr[0]);
+    }
+
+    @Test
+    public void testCreationDate() throws Exception {
+        Instant now = Instant.now();
+
+        MultiFileConcatSource s = new MultiFileConcatSource();
+        s.creationDate(now)
+                .add(is(0));
+
+        BufferedReader r = new BufferedReader(new InputStreamReader(s.build()));
+        assertThat(r.readLine()).isEqualTo("creationdate:"+now.toString());
+        assertThat(r.readLine()).isEqualTo(testStr[0]);
     }
 
 

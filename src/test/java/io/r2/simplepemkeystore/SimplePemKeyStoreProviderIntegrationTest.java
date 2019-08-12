@@ -1,32 +1,15 @@
 package io.r2.simplepemkeystore;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import javax.net.ssl.*;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.File;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -108,5 +91,27 @@ public class SimplePemKeyStoreProviderIntegrationTest extends HttpsBaseFunctions
         }
     }
 
+    @Test
+    public void testMultiAlias() throws Exception {
+        KeyStore ks = KeyStore.getInstance("simplepem");
+        ks.load(
+                new MultiFileConcatSource()
+                        .alias("anna")
+                        .add("src/test/resources/certchain.pem")
+                        .add("src/test/resources/key.pem")
+                        .alias("r2")
+                        .add("src/test/resources/selfcert.pem")
+                        .add("src/test/resources/selfkey.pem")
+                        .build(),
+                new char[0] // no password
+        );
+
+        Certificate[] cert_anna = ks.getCertificateChain("anna");
+        assertThat(cert_anna[0]).isInstanceOf(X509Certificate.class);
+        assertThat(((X509Certificate)cert_anna[0]).getSubjectX500Principal().getName()).isEqualTo("CN=anna.apn2.com");
+        Certificate[] cert_r2 = ks.getCertificateChain("r2");
+        assertThat(cert_r2[0]).isInstanceOf(X509Certificate.class);
+        assertThat(((X509Certificate)cert_r2[0]).getSubjectX500Principal().getName()).isEqualTo("CN=self.signed.cert,O=Radical Research,ST=NA,C=IO");
+    }
 
 }

@@ -6,7 +6,12 @@ import org.testng.annotations.Test;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -84,9 +89,46 @@ public class PemCertKeyTest {
         assertThat(t.getCreationDate()).isCloseTo(new Date(), 5000);
     }
 
-    // TODO: metadata test
+    @Test
+    public void testMetaData() throws Exception {
+        Instant t = Instant.now().minus(1, ChronoUnit.HOURS);
+        InputStream in = new MultiFileConcatSource()
+                .alias("myAlias")
+                .creationDate(t)
+                .add("src/test/resources/certchain.pem")
+                .add("src/test/resources/key.pem")
+                .build();
 
-    // TODO: multiple cert test
+        PemCertKey certKey = PemStreamParser.parseCertificate(in);
 
+        assertThat(certKey.getAlias()).isEqualTo("myAlias");
+        assertThat(certKey.getCreationDate()).isEqualTo(Date.from(t));
+    }
+
+    @Test
+    public void testMultiCert() throws Exception {
+        InputStream in = new MultiFileConcatSource()
+                .alias("anna")
+                .add("src/test/resources/certchain.pem")
+                .add("src/test/resources/key.pem")
+                .alias("r2")
+                .add("src/test/resources/selfcert.pem")
+                .add("src/test/resources/selfkey.pem")
+                .build();
+
+        List<PemCertKey> list = PemStreamParser.parseCertificateList(in);
+
+        assertThat(list).hasSize(2);
+        PemCertKey anna = list.get(0);
+        assertThat(anna.getAlias()).isEqualTo("anna");
+        Certificate[] cert_anna = anna.getCertificateChain();
+        assertThat(cert_anna[0]).isInstanceOf(X509Certificate.class);
+        assertThat(((X509Certificate)cert_anna[0]).getSubjectX500Principal().getName()).isEqualTo("CN=anna.apn2.com");
+        PemCertKey r2 = list.get(1);
+        assertThat(r2.getAlias()).isEqualTo("r2");
+        Certificate[] cert_r2 = r2.getCertificateChain();
+        assertThat(cert_r2[0]).isInstanceOf(X509Certificate.class);
+        assertThat(((X509Certificate)cert_r2[0]).getSubjectX500Principal().getName()).isEqualTo("CN=self.signed.cert,O=Radical Research,ST=NA,C=IO");
+    }
 
 }

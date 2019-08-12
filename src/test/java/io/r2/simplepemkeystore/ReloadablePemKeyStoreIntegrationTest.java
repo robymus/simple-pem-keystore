@@ -73,7 +73,7 @@ public class ReloadablePemKeyStoreIntegrationTest extends HttpsBaseFunctions {
 
 
     @Test
-    public void testHttps() throws Exception {
+    public void testHttps_simplepemreload() throws Exception {
         // skip long tests if io.r2.skipLongTests is set to true
         if ("true".equals(System.getProperty("io.r2.skipLongTests"))) throw new SkipException("Long test skipped");
 
@@ -101,7 +101,58 @@ public class ReloadablePemKeyStoreIntegrationTest extends HttpsBaseFunctions {
 
             copyCertKey("selfcert.pem", "selfkey.pem");
 
-            Thread.sleep(15000); // wait for picking up the change in 5 seconds (+extra)
+            Thread.sleep(10000); // wait for picking up the change in 5 seconds (+extra)
+
+            HttpsURLConnection conn2 = createClientConnection();
+
+            assertThat(conn2.getPeerPrincipal().getName()).isEqualTo("CN=self.signed.cert,O=Radical Research,ST=NA,C=IO");
+
+        }
+        finally {
+            // stop server
+            server.stop(0);
+        }
+    }
+
+    @Test
+    public void testHttps_simplepem() throws Exception {
+        // skip long tests if io.r2.skipLongTests is set to true
+        if ("true".equals(System.getProperty("io.r2.skipLongTests"))) throw new SkipException("Long test skipped");
+
+        KeyStore ks = KeyStore.getInstance("simplepem");
+        ks.load(new MultiFileConcatSource()
+                    .alias("server")
+                    .add("src/test/resources/certchain.pem")
+                    .add("src/test/resources/key.pem")
+                    .build(),
+                new char[0]
+        );
+
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("simplepemreload");
+        kmf.init( ExpiringCacheKeyManagerParameters.forKeyStore(ks).withRevalidation(5) );
+
+        KeyManager[] km = kmf.getKeyManagers();
+        assertThat(km).hasSize(1);
+
+        SSLContext ctx = SSLContext.getInstance("TLSv1.2");
+        ctx.init(km, null, null);
+
+        HttpsServer server = startHttpsServer(ctx);
+
+        try {
+            HttpsURLConnection conn = createClientConnection();
+
+            assertThat(conn.getPeerPrincipal().getName()).isEqualTo("CN=anna.apn2.com");
+
+            ks.load(new MultiFileConcatSource()
+                            .alias("server")
+                            .add("src/test/resources/selfcert.pem")
+                            .add("src/test/resources/selfkey.pem")
+                            .build(),
+                    new char[0]
+            );
+
+            Thread.sleep(10000); // wait for picking up the change in 5 seconds (+extra)
 
             HttpsURLConnection conn2 = createClientConnection();
 
