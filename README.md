@@ -7,7 +7,7 @@ The keystore also implements scheduled/automatic reloading of certificates in ca
 ## Compile
 
 ```Shell
-gradle jar
+./gradlew jar
 ```
 
 ## Get
@@ -20,14 +20,14 @@ For maven:
 	<dependency>
 	    <groupId>io.r2</groupId>
 	    <artifactId>simple-pem-keystore</artifactId>
-	    <version>0.2</version>
+	    <version>0.3</version>
 	</dependency>
 ```
 
 For gradle:
 
 ```gradle
-	compile group: 'io.r2', name: 'simple-pem-keystore', version: '0.2'
+	compile group: 'io.r2', name: 'simple-pem-keystore', version: '0.3'
 ```
 
 ## Registering the security provider
