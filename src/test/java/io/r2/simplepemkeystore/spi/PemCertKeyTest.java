@@ -9,7 +9,6 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.Date;
 import java.util.List;
 
@@ -20,10 +19,63 @@ import static org.assertj.core.api.Assertions.*;
  */
 public class PemCertKeyTest {
 
+    @Test
+    public void testCert() throws Exception {
+        doTestCert("src/test/resources/cert.pem");
+    }
 
     @Test
-    public void testCertOnly() throws Exception {
-        InputStream in = new FileInputStream("src/test/resources/cert.pem");
+    public void testCertBlankLine() throws Exception {
+        doTestCert("src/test/resources/cert-with-trailing-blank-line.pem");
+    }
+
+    @Test
+    public void testCertAcme() throws Exception {
+        doTestCert("src/test/resources/acme-cert.pem");
+    }
+
+    @Test
+    public void testKey() throws Exception {
+        doTestKey("src/test/resources/key.pem");
+    }
+
+    @Test
+    public void testKeyBlankLine() throws Exception {
+        doTestKey("src/test/resources/key-with-two-trailing-blank-lines.pem");
+    }
+
+    @Test
+    public void testKeyAcme() throws Exception {
+        doTestKey("src/test/resources/acme-key.pem");
+    }
+
+
+    @Test
+    public void testCertKey() throws Exception {
+        doTestCertKey(
+                "src/test/resources/certchain.pem",
+                "src/test/resources/key.pem"
+        );
+    }
+
+    @Test
+    public void testCertKeyBlankLine() throws Exception {
+        doTestCertKey(
+                "src/test/resources/certchain-with-trailing-blank-line.pem",
+                "src/test/resources/key-with-two-trailing-blank-lines.pem"
+        );
+    }
+
+    @Test
+    public void testCertKeyAcme() throws Exception {
+        doTestCertKey(
+                "src/test/resources/acme-fullchain.pem",
+                "src/test/resources/acme-key.pem"
+        );
+    }
+
+    public void doTestCert(String fn) throws Exception {
+        InputStream in = new FileInputStream(fn);
         PemCertKey t = PemStreamParser.parseCertificate(in);
 
         Certificate cert = t.getCertificate();
@@ -43,9 +95,8 @@ public class PemCertKeyTest {
         assertThat(t.getCreationDate()).isCloseTo(new Date(), 5000);
     }
 
-    @Test
-    public void testKeyOnly() throws Exception {
-        InputStream in = new FileInputStream("src/test/resources/key.pem");
+    public void doTestKey(String fn) throws Exception {
+        InputStream in = new FileInputStream(fn);
         PemCertKey t = PemStreamParser.parseCertificate(in);
 
         assertThat(t.hasCertificate()).isFalse();
@@ -61,13 +112,8 @@ public class PemCertKeyTest {
         assertThat(t.getCreationDate()).isCloseTo(new Date(), 5000);
     }
 
-
-    @Test
-    public void testCertKey() throws Exception {
-        InputStream in = MultiFileConcatSource.fromFiles(
-                "src/test/resources/certchain.pem",
-                "src/test/resources/key.pem"
-        ).build();
+    public void doTestCertKey(String fn_cert, String fn_key) throws Exception {
+        InputStream in = MultiFileConcatSource.fromFiles(fn_cert, fn_key).build();
         PemCertKey t = PemStreamParser.parseCertificate(in);
 
         Certificate cert = t.getCertificate();

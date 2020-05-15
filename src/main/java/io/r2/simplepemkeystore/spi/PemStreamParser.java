@@ -15,7 +15,7 @@ public class PemStreamParser {
 
     protected InputStream in;
 
-    public enum ChunkType { certificate, key, metaData, end }
+    public enum ChunkType { certificate, pkcs8_key, pkcs1_key, metaData, end }
 
     public PemStreamParser(InputStream in) {
         this.in = in;
@@ -76,9 +76,20 @@ public class PemStreamParser {
                                 chunk.clear();
                             }
                             chunk.add(line);
-                            currentChunkType = ChunkType.key;
+                            currentChunkType = ChunkType.pkcs8_key;
                             inChunk = true;
                             chunkEndMarker = "-----END PRIVATE KEY-----";
+                            break;
+                        case "-----BEGIN RSA PRIVATE KEY-----":
+                            if (chunk.size() > 0) {
+                                // there was metadata before this
+                                consumer.accept(ChunkType.metaData, chunk);
+                                chunk.clear();
+                            }
+                            chunk.add(line);
+                            currentChunkType = ChunkType.pkcs1_key;
+                            inChunk = true;
+                            chunkEndMarker = "-----END RSA PRIVATE KEY-----";
                             break;
                         default:
                             // unknown chunk
@@ -174,10 +185,11 @@ public class PemStreamParser {
                         if (pending == null) pending = new PemCertKey();
                         pending.addCertificate(chunk);
                         break;
-                    case key:
+                    case pkcs8_key:
+                    case pkcs1_key:
                         // start a new, if this is the first block
                         if (pending == null) pending = new PemCertKey();
-                        pending.setPrivateKey(chunk);
+                        pending.setPrivateKey(chunk, chunkType);
                         break;
                     case end:
                         if (pending != null) {

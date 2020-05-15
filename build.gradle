@@ -1,16 +1,24 @@
-apply plugin: 'java'
-apply plugin: 'jacoco'
-apply from:   'publishing.gradle'
+plugins {
+    id 'java-library'
+    id 'jacoco'
+    id 'maven-publish'
+    id 'signing'
+}
+
+group = "io.r2"
+version = "0.3"
+
+defaultTasks "jar"
 
 repositories {
     jcenter()
 }
 
 dependencies {
-    compile (
+    implementation (
         'com.fasterxml.jackson.core:jackson-databind:2.7.4'
     )
-    testCompile (
+    testImplementation (
         'org.testng:testng:6.9.12',
         'org.assertj:assertj-core:3.5.2',
         'org.mockito:mockito-core:2.2.17'
@@ -28,3 +36,54 @@ javadoc {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            pom {
+                name = 'Simple PEM KeyStore'
+                description = 'A java keystore implementation to use PEM files directly.'
+                url = 'https://github.com/robymus/simple-pem-keystore'
+
+                scm {
+                    connection = 'scm:git:https://github.com/robymus/simple-pem-keystore.git'
+                    developerConnection = 'scm:git:git@github.com:robymus/simple-pem-keystore.git'
+                    url = 'https://github.com/robymus/simple-pem-keystore'
+                }
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'robymus'
+                        name = 'Robert Elek'
+                        email = 'r@r2.io'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+        }
+    }}
+
+signing {
+    sign publishing.publications.mavenJava
+}

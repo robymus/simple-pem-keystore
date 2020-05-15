@@ -11,6 +11,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -78,24 +79,38 @@ class PemCertKey {
     }
 
     /**
-     * Method used during parsing : sets the private key in this entry
+     * Internal method used during parsing : sets the private key in this entry
      *
      * @param key the chunk containing certificate
+     * @param chunkType pkcs8_key or rsa_key - other values throw NoSuchAlgorithmException
      * @throws CertificateException if key already exists
      */
-    public void setPrivateKey(List<String> key) throws CertificateException, NoSuchAlgorithmException {
+    public void setPrivateKey(List<String> key, PemStreamParser.ChunkType chunkType) throws CertificateException, NoSuchAlgorithmException {
         if (privateKey != null) throw new CertificateException("More than one private key in PEM input");
 
         String b64key = String.join("", key.subList(1, key.size() - 1));
         byte[] binKey = Base64.getDecoder().decode(b64key);
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(binKey);
+
+        KeySpec keySpec;
+
+        switch (chunkType) {
+            case pkcs8_key:
+                keySpec = new PKCS8EncodedKeySpec(binKey);
+                break;
+            case pkcs1_key:
+                keySpec = new PKCS8EncodedKeySpec(PKCS1Converter.toPKCS8(binKey));
+                break;
+            default:
+                // this should not happen, as it is called only for matching types
+                throw new NoSuchAlgorithmException("Invalid private key type: "+chunkType);
+        }
 
         KeyFactory kf = KeyFactory.getInstance("RSA");
         try {
             privateKey = kf.generatePrivate(keySpec);
         }
         catch (InvalidKeySpecException e) {
-            throw new CertificateException(e);
+            throw new NoSuchAlgorithmException(e);
         }
     }
 

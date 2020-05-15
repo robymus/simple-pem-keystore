@@ -12,7 +12,7 @@ gradle jar
 
 ## Get
 
-The latest release version (0.2) is available in the Maven Central repository.
+The latest release version (0.3) is available in the Maven Central repository.
 
 For maven:
 
@@ -160,7 +160,7 @@ To fully utilize the reloading capability, the new key manager has to be used. T
 
 *new in 0.2*
 
-Now the "simplepem" provider also supports certificate reloading, when used with the "simplepemreload" key manager factory. To use this, simple load a new certificate (or set of certificates) with `ks.load`.
+Now the "simplepem" provider also supports certificate reloading, when used with the "simplepemreload" key manager factory. To use this, simply load a new certificate (or set of certificates) with `ks.load`.
 
 Note: when loading new certificates, the existing ones with same alias are overwritten, but it does not delete the ones with no reference in the new input. This is to be consistent with JCE, which expects certificates to not disappear after being used (KeyManager caches certificates).
 
