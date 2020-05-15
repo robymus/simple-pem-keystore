@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.r2"
-version = "0.3"
+version = "0.4-SNAPSHOT"
 
 defaultTasks "jar"
 
