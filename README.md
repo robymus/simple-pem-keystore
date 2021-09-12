@@ -4,6 +4,12 @@ A java keystore implementation to use PEM files directly, instead of converting 
 
 The keystore also implements scheduled/automatic reloading of certificates in case of change, so it can be used with short lived certificates, for example Let's Encrypt certificates, without application reset (or creating a new SSLContext / Socket).
  
+## Module support
+
+As of version 0.4, the keystore has been ported to module for better Java 9+ compatibility. Please use version 0.3 if you are using Java 8.
+
+The module name is `io.r2io.simplepemkeystore`. Unfortunately it can't match the package name, as module name can't contain trailing numbers :(
+
 ## Compile
 
 ```Shell
@@ -12,7 +18,7 @@ The keystore also implements scheduled/automatic reloading of certificates in ca
 
 ## Get
 
-The latest release version (0.3) is available in the Maven Central repository.
+The latest release version (0.4) is available in the Maven Central repository.
 
 For maven:
 
@@ -20,14 +26,14 @@ For maven:
 	<dependency>
 	    <groupId>io.r2</groupId>
 	    <artifactId>simple-pem-keystore</artifactId>
-	    <version>0.3</version>
+	    <version>0.4</version>
 	</dependency>
 ```
 
 For gradle:
 
 ```gradle
-	compile group: 'io.r2', name: 'simple-pem-keystore', version: '0.3'
+	compile group: 'io.r2', name: 'simple-pem-keystore', version: '0.4'
 ```
 
 ## Registering the security provider
@@ -189,6 +195,5 @@ Licensed under the MIT license.
  
 ## Requirements
 
-Java 8 is required to compile or run.
+Java 9 is required to compile or run.
 Also depends on jackson-databind.
-

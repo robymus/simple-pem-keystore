@@ -11,17 +11,17 @@ version = "0.4-SNAPSHOT"
 defaultTasks "jar"
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
     implementation (
-        'com.fasterxml.jackson.core:jackson-databind:2.7.4'
+        'com.fasterxml.jackson.core:jackson-databind:2.12.5'
     )
     testImplementation (
-        'org.testng:testng:6.9.12',
-        'org.assertj:assertj-core:3.5.2',
-        'org.mockito:mockito-core:2.2.17'
+        'org.testng:testng:7.4.0',
+        'org.assertj:assertj-core:3.20.2',
+        'org.mockito:mockito-core:3.12.4'
     )
 }
 
@@ -33,13 +33,18 @@ javadoc {
     exclude "io/r2/simplepemkeystore/spi/**"
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.9
+targetCompatibility = 1.9
 
 java {
     withJavadocJar()
     withSourcesJar()
 }
+
+compileJava {
+    options.deprecation = true;
+}
+
 
 publishing {
     publications {
