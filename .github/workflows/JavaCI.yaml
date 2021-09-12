@@ -17,12 +17,14 @@ jobs:
       - name: Build jar with Gradle
         run: ./gradlew jar
       - name: Run tests with Gradle
-        run: ./gradlew test jococoTestReport
-      - uses: actions/upload-artifact@v2
+        run: ./gradlew test jacocoTestReport
+      - name: Upload Jar
+        uses: actions/upload-artifact@v2
         with:
           name: Jar
           path: build/libs
-      - uses: actions/upload-artifact@v2
+      - name: Upload Reports
+        uses: actions/upload-artifact@v2
         with:
           name: Reports
           path: build/reports
